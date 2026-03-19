@@ -1,0 +1,13 @@
+run = "gunicorn app:app --bind 0.0.0.0:5000"
+entrypoint = "app.py"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-5000}"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

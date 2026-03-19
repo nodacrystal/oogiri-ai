@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大喜利AI - 回答ジェネレーター</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 大喜利AI</h1>
+            <p class="subtitle">18,589件のデータから導き出されたアルゴリズムで回答生成</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <label for="odai">お題を入力</label>
+                <textarea id="odai" placeholder="例：もしも猫が総理大臣になったら？" rows="3"></textarea>
+
+                <div class="options">
+                    <div class="option-group">
+                        <label for="style">回答スタイル</label>
+                        <select id="style">
+                            <option value="バランス">バランス（おすすめ）</option>
+                            <option value="一言キラー">一言キラー（10文字以内）</option>
+                            <option value="知的ユーモア">知的ユーモア（言葉遊び）</option>
+                            <option value="シュール">シュール（予想外）</option>
+                            <option value="あるある">あるある（共感系）</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="num">回答数</label>
+                        <select id="num">
+                            <option value="3" selected>3個</option>
+                            <option value="5">5個</option>
+                            <option value="1">1個</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="generate-btn" onclick="generate()">回答を生成する</button>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>アルゴリズム適用中...</p>
+            </div>
+
+            <div id="results" class="results hidden">
+                <div class="pattern-badge" id="pattern-badge"></div>
+                <div id="answers-list"></div>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+        </main>
+
+        <footer>
+            <a href="/algorithm">アルゴリズム詳細を見る</a>
+            <span>|</span>
+            <span>Powered by Claude API + 18,589件の大喜利データ分析</span>
+        </footer>
+    </div>
+
+    <script>
+        async function generate() {
+            const odai = document.getElementById('odai').value.trim();
+            if (!odai) {
+                alert('お題を入力してください');
+                return;
+            }
+
+            const style = document.getElementById('style').value;
+            const num = parseInt(document.getElementById('num').value);
+            const btn = document.getElementById('generate-btn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const error = document.getElementById('error');
+
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            error.classList.add('hidden');
+
+            try {
+                const res = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ odai, num_answers: num, style })
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    error.textContent = data.error;
+                    error.classList.remove('hidden');
+                    return;
+                }
+
+                const badge = document.getElementById('pattern-badge');
+                badge.textContent = `お題パターン: ${data.odai_pattern}`;
+
+                const list = document.getElementById('answers-list');
+                list.innerHTML = '';
+
+                data.answers.forEach((item, i) => {
+                    const card = document.createElement('div');
+                    card.className = 'answer-card';
+                    card.innerHTML = `
+                        <div class="answer-number">${i + 1}</div>
+                        <div class="answer-text">${escapeHtml(item.answer)}</div>
+                        <div class="answer-meta">
+                            <span class="technique">${escapeHtml(item.technique)}</span>
+                            <span class="explanation">${escapeHtml(item.explanation)}</span>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+
+                results.classList.remove('hidden');
+            } catch (e) {
+                error.textContent = '通信エラーが発生しました: ' + e.message;
+                error.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enterキーで生成
+        document.getElementById('odai').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generate();
+            }
+        });
+    </script>
+</body>
+</html>

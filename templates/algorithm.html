@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大喜利回答アルゴリズム詳細</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 大喜利回答アルゴリズム v1.0</h1>
+            <p class="subtitle">18,589件の大喜利データベースから統計分析で導出</p>
+        </header>
+
+        <main class="algorithm-page">
+            <section class="algo-section">
+                <h2>分析データ概要</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">18,589</div>
+                        <div class="stat-label">分析データ数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">13.4文字</div>
+                        <div class="stat-label">平均回答文字数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">10.18票</div>
+                        <div class="stat-label">平均得票数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">39票</div>
+                        <div class="stat-label">最高得票数</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="algo-section">
+                <h2>7大テクニック（得票効率順）</h2>
+
+                <div class="technique-card rank-s">
+                    <div class="rank">S</div>
+                    <div class="technique-content">
+                        <h3>擬人化・キャラクター化</h3>
+                        <div class="avg-score">平均得票 10.63</div>
+                        <p>物や概念を人のように扱う。お題に無生物が登場したら「人としての感情」を具体化する。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「うちのソファがスネている」→「『人をダメにする』って言われた」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-a">
+                    <div class="rank">A</div>
+                    <div class="technique-content">
+                        <h3>ダブルミーニング</h3>
+                        <div class="avg-score">平均得票 10.45</div>
+                        <p>1つの言葉が持つ2つの意味を利用する。お題のキーワードから別の文脈の意味を探す。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「ベンチで泣いている」→「監督から『ベンチに戻れ』と言われた」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-a">
+                    <div class="rank">A</div>
+                    <div class="technique-content">
+                        <h3>文脈の予想外シフト</h3>
+                        <div class="avg-score">平均得票 10.38</div>
+                        <p>お題が想定する文脈から全く別の文脈へジャンプする。前提を裏切る意外な角度。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「半袖を着てくる人」→「無課金」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-b">
+                    <div class="rank">B</div>
+                    <div class="technique-content">
+                        <h3>固有名詞・時事ネタ活用</h3>
+                        <div class="avg-score">平均得票 10.31</div>
+                        <p>有名人・ブランド・ゲーム等の共有知識を使って意外性を出す。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「KFCの新メニュー」→「ファミチキ」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-b">
+                    <div class="rank">B</div>
+                    <div class="technique-content">
+                        <h3>セリフ・台詞形式</h3>
+                        <div class="avg-score">平均得票 10.22</div>
+                        <p>「」で括った台詞調で臨場感を出す。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「勇者が言わなそうなセリフ」→「負けたら負けたで話は進むぞ」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-c">
+                    <div class="rank">C</div>
+                    <div class="technique-content">
+                        <h3>あるあるの誇張・ひねり</h3>
+                        <p>共感できる「あるある」を極端に誇張する。</p>
+                        <div class="example">
+                            <strong>例</strong> お題「お母さんがこっそりやっていること」→「裏垢で子供のポストにいいね」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technique-card rank-c">
+                    <div class="rank">C</div>
+                    <div class="technique-content">
+                        <h3>メタ・自己言及</h3>
+                        <p>お題の構造自体や「大喜利をしている状況」に言及する。最終手段。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="algo-section">
+                <h2>お題パターン別の最適戦略</h2>
+                <table class="pattern-table">
+                    <thead>
+                        <tr>
+                            <th>パターン</th>
+                            <th>出現率</th>
+                            <th>最適テクニック</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>〜どんな？系</td><td>25.7%</td><td>擬人化 / ダブルミーニング</td></tr>
+                        <tr><td>〜とは？系</td><td>25.3%</td><td>予想外シフト / 固有名詞</td></tr>
+                        <tr><td>もしも〜系</td><td>10.3%</td><td>予想外の具体的結果</td></tr>
+                        <tr><td>何があった？系</td><td>6.6%</td><td>ダブルミーニング</td></tr>
+                        <tr><td>なぜ？系</td><td>—</td><td>無関係だが論理的な理由</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="algo-section">
+                <h2>基本原則</h2>
+                <ul class="principles">
+                    <li><strong>短さは正義</strong> — 理想は10文字以内、最大20文字</li>
+                    <li><strong>1回答1ボケ</strong> — 複数のボケは焦点をぼかす</li>
+                    <li><strong>意外性 > 正確性</strong> — 正しさよりも「予想外」を優先</li>
+                    <li><strong>共有知識を活用</strong> — みんなが知っていることをひねる</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <a href="/">← 回答生成に戻る</a>
+        </footer>
+    </div>
+</body>
+</html>
