@@ -3,143 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大喜利AI - 回答ジェネレーター</title>
+    <title>大喜利ダジャレAI - New_oogiri_arg</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎤 大喜利AI</h1>
-            <p class="subtitle">18,589件のデータから導き出されたアルゴリズムで回答生成</p>
+            <h1>大喜利ダジャレAI</h1>
+            <p class="subtitle">母音解析アルゴリズムによるダジャレ回答生成エンジン</p>
         </header>
 
         <main>
+            <!-- お題入力セクション -->
             <div class="input-section">
-                <label for="odai">お題を入力</label>
-                <textarea id="odai" placeholder="例：もしも猫が総理大臣になったら？" rows="3"></textarea>
+                <div class="input-header">
+                    <label for="odai">お題を入力</label>
+                    <button class="btn-fetch" onclick="fetchOdai()" title="oogiri.appからお題を取得">
+                        お題を取得
+                    </button>
+                </div>
+                <textarea id="odai" placeholder="例: こんな子守歌はイヤだ！どんな子守歌？" rows="3"></textarea>
 
-                <div class="options">
-                    <div class="option-group">
-                        <label for="style">回答スタイル</label>
-                        <select id="style">
-                            <option value="バランス">バランス（おすすめ）</option>
-                            <option value="一言キラー">一言キラー（10文字以内）</option>
-                            <option value="知的ユーモア">知的ユーモア（言葉遊び）</option>
-                            <option value="シュール">シュール（予想外）</option>
-                            <option value="あるある">あるある（共感系）</option>
-                        </select>
+                <!-- 取得したお題リスト -->
+                <div id="odai-list" class="odai-list hidden"></div>
+
+                <button id="generate-btn" class="btn-generate" onclick="generateStream()">
+                    ダジャレ回答を生成する
+                </button>
+            </div>
+
+            <!-- アルゴリズム進捗表示 -->
+            <div id="progress" class="progress-section hidden">
+                <h2>アルゴリズム実行中</h2>
+
+                <div class="step-tracker">
+                    <!-- Step 1 -->
+                    <div class="step" id="step-1" data-status="waiting">
+                        <div class="step-header">
+                            <span class="step-icon">1</span>
+                            <span class="step-title">お題解析</span>
+                            <span class="step-status"></span>
+                        </div>
+                        <div class="step-detail" id="step-1-detail"></div>
                     </div>
-                    <div class="option-group">
-                        <label for="num">回答数</label>
-                        <select id="num">
-                            <option value="3" selected>3個</option>
-                            <option value="5">5個</option>
-                            <option value="1">1個</option>
-                        </select>
+
+                    <!-- Step 2 -->
+                    <div class="step" id="step-2" data-status="waiting">
+                        <div class="step-header">
+                            <span class="step-icon">2</span>
+                            <span class="step-title">クラスター生成</span>
+                            <span class="step-status"></span>
+                        </div>
+                        <div class="step-detail" id="step-2-detail"></div>
+                    </div>
+
+                    <!-- Step 3-4 -->
+                    <div class="step" id="step-3" data-status="waiting">
+                        <div class="step-header">
+                            <span class="step-icon">3</span>
+                            <span class="step-title">母音解析 &amp; 組み合わせ計算</span>
+                            <span class="step-status"></span>
+                        </div>
+                        <div class="step-detail" id="step-3-detail"></div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="step" id="step-5" data-status="waiting">
+                        <div class="step-header">
+                            <span class="step-icon">4</span>
+                            <span class="step-title">ダジャレ回答生成</span>
+                            <span class="step-status"></span>
+                        </div>
+                        <div class="step-detail" id="step-5-detail"></div>
                     </div>
                 </div>
-
-                <button id="generate-btn" onclick="generate()">回答を生成する</button>
             </div>
 
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>アルゴリズム適用中...</p>
-            </div>
-
-            <div id="results" class="results hidden">
-                <div class="pattern-badge" id="pattern-badge"></div>
+            <!-- 結果表示 -->
+            <div id="results" class="results-section hidden">
+                <h2>生成結果</h2>
                 <div id="answers-list"></div>
             </div>
 
+            <!-- エラー表示 -->
             <div id="error" class="error hidden"></div>
         </main>
 
         <footer>
-            <a href="/algorithm">アルゴリズム詳細を見る</a>
+            <a href="/algorithm">アルゴリズム詳細</a>
             <span>|</span>
-            <span>Powered by Claude API + 18,589件の大喜利データ分析</span>
+            <span>Powered by New_oogiri_arg + Claude API</span>
         </footer>
     </div>
 
     <script>
-        async function generate() {
-            const odai = document.getElementById('odai').value.trim();
-            if (!odai) {
-                alert('お題を入力してください');
+    // ── お題取得 ──
+    let currentPage = 1;
+
+    async function fetchOdai() {
+        const listEl = document.getElementById('odai-list');
+        listEl.innerHTML = '<div class="loading-text">お題を取得中...</div>';
+        listEl.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/fetch-odai?page=${currentPage}`);
+            const data = await res.json();
+
+            if (data.error) {
+                listEl.innerHTML = `<div class="error-text">${esc(data.error)}</div>`;
                 return;
             }
 
-            const style = document.getElementById('style').value;
-            const num = parseInt(document.getElementById('num').value);
-            const btn = document.getElementById('generate-btn');
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('results');
-            const error = document.getElementById('error');
+            let html = '<div class="odai-items">';
+            (data.odai_list || []).forEach((item, i) => {
+                html += `<div class="odai-item" onclick="selectOdai(this)" data-text="${esc(item.text)}">${i+1}. ${esc(item.text)}</div>`;
+            });
+            html += '</div>';
+            html += `<div class="odai-nav">
+                <button onclick="changePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>前へ</button>
+                <span>ページ ${currentPage}</span>
+                <button onclick="changePage(1)">次へ</button>
+            </div>`;
+            listEl.innerHTML = html;
+        } catch (e) {
+            listEl.innerHTML = `<div class="error-text">通信エラー: ${e.message}</div>`;
+        }
+    }
 
-            btn.disabled = true;
-            loading.classList.remove('hidden');
-            results.classList.add('hidden');
-            error.classList.add('hidden');
+    function changePage(dir) {
+        currentPage = Math.max(1, currentPage + dir);
+        fetchOdai();
+    }
 
-            try {
-                const res = await fetch('/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ odai, num_answers: num, style })
-                });
+    function selectOdai(el) {
+        document.getElementById('odai').value = el.dataset.text;
+        document.querySelectorAll('.odai-item').forEach(i => i.classList.remove('selected'));
+        el.classList.add('selected');
+    }
 
-                const data = await res.json();
+    // ── ダジャレ生成（SSE ストリーム） ──
+    function generateStream() {
+        const odai = document.getElementById('odai').value.trim();
+        if (!odai) { alert('お題を入力してください'); return; }
 
-                if (data.error) {
-                    error.textContent = data.error;
+        const btn = document.getElementById('generate-btn');
+        const progress = document.getElementById('progress');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+
+        btn.disabled = true;
+        btn.textContent = '生成中...';
+        progress.classList.remove('hidden');
+        results.classList.add('hidden');
+        error.classList.add('hidden');
+
+        // ステップをリセット
+        document.querySelectorAll('.step').forEach(s => {
+            s.dataset.status = 'waiting';
+            s.querySelector('.step-detail').innerHTML = '';
+        });
+
+        const source = new EventSource(`/generate-stream?odai=${encodeURIComponent(odai)}`);
+
+        source.onmessage = function(event) {
+            const msg = JSON.parse(event.data);
+            handleStepEvent(msg);
+
+            if (msg.status === 'complete' || msg.status === 'error') {
+                source.close();
+                btn.disabled = false;
+                btn.textContent = 'ダジャレ回答を生成する';
+
+                if (msg.status === 'error' && msg.step === -1) {
+                    error.textContent = msg.data.message;
                     error.classList.remove('hidden');
-                    return;
                 }
+            }
+        };
 
-                const badge = document.getElementById('pattern-badge');
-                badge.textContent = `お題パターン: ${data.odai_pattern}`;
+        source.onerror = function() {
+            source.close();
+            btn.disabled = false;
+            btn.textContent = 'ダジャレ回答を生成する';
+            error.textContent = '接続エラーが発生しました。API キーが設定されているか確認してください。';
+            error.classList.remove('hidden');
+        };
+    }
 
-                const list = document.getElementById('answers-list');
-                list.innerHTML = '';
+    function handleStepEvent(msg) {
+        const stepEl = document.getElementById(`step-${msg.step}`);
+        if (!stepEl) return;
 
-                data.answers.forEach((item, i) => {
+        stepEl.dataset.status = msg.status;
+        const detail = stepEl.querySelector('.step-detail');
+
+        if (msg.status === 'processing') {
+            detail.innerHTML = `<div class="processing">${esc(msg.data.message || '処理中...')}</div>`;
+        }
+
+        if (msg.status === 'done') {
+            const d = msg.data;
+
+            if (msg.step === 1) {
+                detail.innerHTML = `
+                    <div class="result-box">
+                        <div class="result-row"><span class="label">主語（核）:</span> <strong>${esc(d.subject)}</strong></div>
+                        <div class="result-row"><span class="label">修飾語:</span> <strong>${esc((d.modifiers||[]).join('、'))}</strong></div>
+                        <div class="result-row dim">${esc(d.reasoning || '')}</div>
+                    </div>`;
+            }
+
+            if (msg.step === 2) {
+                let subSamples = (d.subject_samples||[]).map(w => `${w.text}(${w.reading}) ${w.score}点`).join('、');
+                let modSamples = (d.modifier_samples||[]).map(w => `${w.text}(${w.reading}) ${w.score}点`).join('、');
+                detail.innerHTML = `
+                    <div class="result-box">
+                        <div class="result-row"><span class="label">主語クラスター:</span> ${d.subject_cluster_size}語</div>
+                        <div class="result-row dim">例: ${esc(subSamples)}</div>
+                        <div class="result-row"><span class="label">修飾語クラスター:</span> ${d.modifier_cluster_size}語</div>
+                        <div class="result-row dim">例: ${esc(modSamples)}</div>
+                    </div>`;
+            }
+
+            if (msg.step === 3) {
+                let combosHtml = '';
+                (d.top_combinations||[]).slice(0, 5).forEach(c => {
+                    combosHtml += `
+                        <div class="combo-item">
+                            <span class="combo-rank">#${c.rank}</span>
+                            <span class="combo-words">${esc(c.subject_word)} + ${esc(c.modifier_word)}</span>
+                            <span class="combo-score">一致率${c.vowel_match_rate}%</span>
+                            <span class="combo-technique tag-${c.technique}">${esc(c.technique)}</span>
+                        </div>`;
+                });
+                detail.innerHTML = `
+                    <div class="result-box">
+                        <div class="result-row"><span class="label">計算パターン:</span> ${d.total_combinations}通り</div>
+                        <div class="result-row"><span class="label">ダジャレの卵:</span> ${d.dajare_eggs_count}個</div>
+                        <div class="combos-list">${combosHtml}</div>
+                    </div>`;
+            }
+
+            if (msg.step === 5) {
+                const answers = d.answers || [];
+                const resultsEl = document.getElementById('results');
+                const listEl = document.getElementById('answers-list');
+                listEl.innerHTML = '';
+
+                answers.forEach((item, i) => {
                     const card = document.createElement('div');
                     card.className = 'answer-card';
                     card.innerHTML = `
                         <div class="answer-number">${i + 1}</div>
-                        <div class="answer-text">${escapeHtml(item.answer)}</div>
-                        <div class="answer-meta">
-                            <span class="technique">${escapeHtml(item.technique)}</span>
-                            <span class="explanation">${escapeHtml(item.explanation)}</span>
-                        </div>
-                    `;
-                    list.appendChild(card);
+                        <div class="answer-body">
+                            <div class="answer-text">${esc(item.answer)}</div>
+                            <div class="answer-meta">
+                                <span class="tag">${esc(item.technique || '')}</span>
+                                <span class="dajare-source">${esc(item.dajare_words || '')}</span>
+                            </div>
+                            <div class="answer-explain">${esc(item.explanation || '')}</div>
+                        </div>`;
+                    listEl.appendChild(card);
                 });
 
-                results.classList.remove('hidden');
-            } catch (e) {
-                error.textContent = '通信エラーが発生しました: ' + e.message;
-                error.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                loading.classList.add('hidden');
+                resultsEl.classList.remove('hidden');
+                detail.innerHTML = `<div class="result-box"><div class="result-row">${answers.length}個の回答を生成しました</div></div>`;
             }
         }
+    }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+    // ── ユーティリティ ──
+    function esc(text) {
+        if (!text) return '';
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    // Ctrl+Enter で生成
+    document.getElementById('odai').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            generateStream();
         }
-
-        // Enterキーで生成
-        document.getElementById('odai').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                generate();
-            }
-        });
+    });
     </script>
 </body>
 </html>

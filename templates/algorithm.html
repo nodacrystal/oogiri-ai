@@ -3,155 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大喜利回答アルゴリズム詳細</title>
+    <title>アルゴリズム解説 - 大喜利ダジャレAI</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .algo-page { max-width: 720px; margin: 0 auto; }
+        .algo-section { margin-bottom: 2.5rem; }
+        .algo-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .step-card h3 {
+            color: var(--accent);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .step-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.8; }
+        .formula {
+            background: var(--surface-light);
+            border-radius: 8px;
+            padding: 0.8rem 1.2rem;
+            font-family: monospace;
+            font-size: 1rem;
+            text-align: center;
+            margin: 0.8rem 0;
+            color: var(--info);
+        }
+        .example-box {
+            background: var(--surface-light);
+            border-left: 3px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            padding: 0.6rem 1rem;
+            margin: 0.6rem 0;
+            font-size: 0.88rem;
+        }
+        .vowel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+        }
+        .vowel-table th, .vowel-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+        .vowel-table th { color: var(--accent); }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: var(--primary); text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📊 大喜利回答アルゴリズム v1.0</h1>
-            <p class="subtitle">18,589件の大喜利データベースから統計分析で導出</p>
-        </header>
+    <div class="container algo-page">
+        <a href="/" class="back-link">&lt; 戻る</a>
+        <h1>New_oogiri_arg アルゴリズム解説</h1>
+        <p class="subtitle">母音解析に基づくダジャレ大喜利回答生成エンジン</p>
 
-        <main class="algorithm-page">
-            <section class="algo-section">
-                <h2>分析データ概要</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">18,589</div>
-                        <div class="stat-label">分析データ数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">13.4文字</div>
-                        <div class="stat-label">平均回答文字数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">10.18票</div>
-                        <div class="stat-label">平均得票数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">39票</div>
-                        <div class="stat-label">最高得票数</div>
-                    </div>
+        <div class="algo-section">
+            <h2>なぜアルゴリズムが必要なのか</h2>
+            <p>AIに「ダジャレを作って」と頼むだけでは:</p>
+            <ul style="color:var(--text-dim);font-size:0.9rem;padding-left:1.5rem;margin:0.5rem 0">
+                <li>ダジャレの定義が曖昧で品質が不安定</li>
+                <li>LLMはお題を「正しく答えよう」としすぎる</li>
+                <li>革新的な意外性が生まれない</li>
+            </ul>
+            <p style="margin-top:0.8rem">解決策: お題を「主語（核）」と「修飾語」に分解し、それぞれの連想ワードを<strong>母音パターン</strong>で数値化。機械的にダジャレの組み合わせを発見する。</p>
+        </div>
+
+        <div class="algo-section">
+            <h2>8ステップ・パイプライン</h2>
+
+            <div class="step-card">
+                <h3>STEP 1: お題解析（Claude API）</h3>
+                <p>お題を「主語（核）」と「修飾語（アテンション）」に分解。修飾語に主語が含まれる場合は除外する。</p>
+                <div class="example-box">
+                    例: 「SNS疲れが溜まっている河童、何があった？」<br>
+                    主語: 河童 / 修飾語: SNS疲れ
                 </div>
-            </section>
+            </div>
 
-            <section class="algo-section">
-                <h2>7大テクニック（得票効率順）</h2>
+            <div class="step-card">
+                <h3>STEP 2: クラスター生成（Gemini / Claude API）</h3>
+                <p>主語・修飾語それぞれに関連するワードを大量生成。見た目、状況、トレンド、関連商品名、印象など多角的に。連想スコア（0-100点）を付与。</p>
+                <p>主語クラスター: 15語 / 修飾語クラスター: 75語</p>
+            </div>
 
-                <div class="technique-card rank-s">
-                    <div class="rank">S</div>
-                    <div class="technique-content">
-                        <h3>擬人化・キャラクター化</h3>
-                        <div class="avg-score">平均得票 10.63</div>
-                        <p>物や概念を人のように扱う。お題に無生物が登場したら「人としての感情」を具体化する。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「うちのソファがスネている」→「『人をダメにする』って言われた」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-a">
-                    <div class="rank">A</div>
-                    <div class="technique-content">
-                        <h3>ダブルミーニング</h3>
-                        <div class="avg-score">平均得票 10.45</div>
-                        <p>1つの言葉が持つ2つの意味を利用する。お題のキーワードから別の文脈の意味を探す。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「ベンチで泣いている」→「監督から『ベンチに戻れ』と言われた」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-a">
-                    <div class="rank">A</div>
-                    <div class="technique-content">
-                        <h3>文脈の予想外シフト</h3>
-                        <div class="avg-score">平均得票 10.38</div>
-                        <p>お題が想定する文脈から全く別の文脈へジャンプする。前提を裏切る意外な角度。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「半袖を着てくる人」→「無課金」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-b">
-                    <div class="rank">B</div>
-                    <div class="technique-content">
-                        <h3>固有名詞・時事ネタ活用</h3>
-                        <div class="avg-score">平均得票 10.31</div>
-                        <p>有名人・ブランド・ゲーム等の共有知識を使って意外性を出す。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「KFCの新メニュー」→「ファミチキ」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-b">
-                    <div class="rank">B</div>
-                    <div class="technique-content">
-                        <h3>セリフ・台詞形式</h3>
-                        <div class="avg-score">平均得票 10.22</div>
-                        <p>「」で括った台詞調で臨場感を出す。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「勇者が言わなそうなセリフ」→「負けたら負けたで話は進むぞ」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-c">
-                    <div class="rank">C</div>
-                    <div class="technique-content">
-                        <h3>あるあるの誇張・ひねり</h3>
-                        <p>共感できる「あるある」を極端に誇張する。</p>
-                        <div class="example">
-                            <strong>例</strong> お題「お母さんがこっそりやっていること」→「裏垢で子供のポストにいいね」
-                        </div>
-                    </div>
-                </div>
-
-                <div class="technique-card rank-c">
-                    <div class="rank">C</div>
-                    <div class="technique-content">
-                        <h3>メタ・自己言及</h3>
-                        <p>お題の構造自体や「大喜利をしている状況」に言及する。最終手段。</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="algo-section">
-                <h2>お題パターン別の最適戦略</h2>
-                <table class="pattern-table">
-                    <thead>
-                        <tr>
-                            <th>パターン</th>
-                            <th>出現率</th>
-                            <th>最適テクニック</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>〜どんな？系</td><td>25.7%</td><td>擬人化 / ダブルミーニング</td></tr>
-                        <tr><td>〜とは？系</td><td>25.3%</td><td>予想外シフト / 固有名詞</td></tr>
-                        <tr><td>もしも〜系</td><td>10.3%</td><td>予想外の具体的結果</td></tr>
-                        <tr><td>何があった？系</td><td>6.6%</td><td>ダブルミーニング</td></tr>
-                        <tr><td>なぜ？系</td><td>—</td><td>無関係だが論理的な理由</td></tr>
-                    </tbody>
+            <div class="step-card">
+                <h3>STEP 3: 母音番号変換（Python）</h3>
+                <p>全ワードをかな読みからローマ字に変換し、母音を番号化する。</p>
+                <table class="vowel-table">
+                    <tr><th>番号</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr>
+                    <tr><td>文字</td><td>a</td><td>i</td><td>u</td><td>e</td><td>o</td><td>ん</td><td>ー</td><td>っ</td></tr>
                 </table>
-            </section>
+                <div class="example-box">
+                    例: ヤンキー → ya-n-ki- → 1-6-2-7<br>
+                    例: 教師 → kyo-u-shi → 5-3-2
+                </div>
+            </div>
 
-            <section class="algo-section">
-                <h2>基本原則</h2>
-                <ul class="principles">
-                    <li><strong>短さは正義</strong> — 理想は10文字以内、最大20文字</li>
-                    <li><strong>1回答1ボケ</strong> — 複数のボケは焦点をぼかす</li>
-                    <li><strong>意外性 > 正確性</strong> — 正しさよりも「予想外」を優先</li>
-                    <li><strong>共有知識を活用</strong> — みんなが知っていることをひねる</li>
+            <div class="step-card">
+                <h3>STEP 4: 連想値組み合わせ計算（Python）</h3>
+                <p>全組み合わせ（最大1,125通り）の連想スコアを計算。</p>
+                <div class="formula">F(x1, x2) = (x1 + x2) x |x1 - x2|</div>
+                <p>「合計の勢い」x「ギャップ（意外性）」。A+B（高連想+低連想）が最高スコア。</p>
+                <table class="vowel-table">
+                    <tr><th>組み合わせ</th><th>例</th><th>スコア</th><th>評価</th></tr>
+                    <tr><td>A + B</td><td>90, 20</td><td>7700</td><td>最高（理想）</td></tr>
+                    <tr><td>A + C</td><td>90, 60</td><td>4500</td><td>良好</td></tr>
+                    <tr><td>A + A</td><td>95, 90</td><td>925</td><td>陳腐</td></tr>
+                    <tr><td>B + B</td><td>30, 20</td><td>500</td><td>シュール</td></tr>
+                    <tr><td>C + C</td><td>60, 55</td><td>575</td><td>最悪</td></tr>
+                </table>
+            </div>
+
+            <div class="step-card">
+                <h3>STEP 5: 母音一致率検証（Python）</h3>
+                <p>組み合わせの母音パターンを比較。2文字以上連続一致のみカウント。</p>
+                <p><strong>ダジャレ一致条件3項目:</strong></p>
+                <ol style="font-size:0.9rem;color:var(--text-dim);padding-left:1.5rem">
+                    <li>母音一致率 50%以上</li>
+                    <li>どちらかの単語の母音カバー率 100%</li>
+                    <li>母音一致数 6以上</li>
+                </ol>
+                <p>条件を満たした組み合わせ = 「ダジャレの卵」</p>
+            </div>
+
+            <div class="step-card">
+                <h3>STEP 6-7: ランキング化（Python）</h3>
+                <p>連想値スコアと母音一致率を掛け合わせた総合スコアでランキング。上位の組み合わせをダジャレ回答の素材にする。</p>
+            </div>
+
+            <div class="step-card">
+                <h3>STEP 8: 回答生成（Claude API）</h3>
+                <p>上位組み合わせにダジャレ技法を適用し、大喜利の回答として完成させる。</p>
+                <p><strong>ダジャレ技法:</strong></p>
+                <ul style="font-size:0.9rem;color:var(--text-dim);padding-left:1.5rem">
+                    <li>掛け言葉（完全一致）</li>
+                    <li>造語（片方100%一致）</li>
+                    <li>連結（50%以上+子音一致）</li>
+                    <li>ダブルミーニング</li>
                 </ul>
-            </section>
-        </main>
+                <p style="margin-top:0.5rem"><strong>NG技法:</strong> 元の単語をフリに入れない / ()で読み方を書かない / 説明しすぎない</p>
+            </div>
+        </div>
 
         <footer>
-            <a href="/">← 回答生成に戻る</a>
+            <a href="/">トップに戻る</a>
         </footer>
     </div>
 </body>
